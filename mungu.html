@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мөнгөний Аялал · Санхүүгийн стратеги</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300..800&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1116;
+    --bg-2:#161A21;
+    --bg-3:#1E232C;
+    --line:#2A3038;
+    --ink:#F2EEDF;
+    --ink-2:#A6A8AE;
+    --ink-3:#6E7079;
+    --gold:#E8B547;
+    --gold-soft:#F5D88A;
+    --mint:#7BE0B0;
+    --coral:#FB7777;
+    --sky:#7CC9F2;
+    --plum:#C39CD8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:'Manrope',sans-serif;min-height:100vh;overflow-x:hidden}
+  body{
+    background:
+      radial-gradient(circle at 12% 8%, rgba(232,181,71,.08), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(123,224,176,.06), transparent 50%),
+      var(--bg);
+  }
+  /* grain */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.35;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+  /* Typography */
+  .display{font-family:'Fraunces',serif;font-weight:300;letter-spacing:-.02em;line-height:.95}
+  .label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3)}
+  .num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+  /* layout */
+  .container{max-width:1320px;margin:0 auto;padding:32px 40px;position:relative;z-index:2}
+  /* ============ INTRO ============ */
+  #intro{min-height:100vh;display:flex;align-items:center;padding:60px 40px}
+  .intro-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:80px;align-items:center;max-width:1320px;margin:0 auto;width:100%}
+  .intro-eyebrow{display:flex;align-items:center;gap:14px;margin-bottom:32px}
+  .intro-eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px var(--gold)}
+  .intro-title{font-size:clamp(56px,9vw,128px);margin-bottom:24px}
+  .intro-title em{font-style:italic;color:var(--gold);font-weight:400}
+  .intro-sub{font-size:20px;line-height:1.5;color:var(--ink-2);max-width:560px;margin-bottom:48px}
+  .intro-sub b{color:var(--ink);font-weight:600}
+  .start-btn{
+    display:inline-flex;align-items:center;gap:18px;padding:22px 36px;border:none;cursor:pointer;
+    background:var(--gold);color:var(--bg);font-family:'Manrope';font-size:17px;font-weight:700;letter-spacing:.02em;
+    border-radius:999px;transition:all .3s cubic-bezier(.2,.8,.2,1);position:relative;overflow:hidden;
+  }
+  .start-btn:hover{transform:translateY(-2px);box-shadow:0 16px 40px -8px rgba(232,181,71,.5)}
+  .start-btn .arrow{font-family:'Fraunces';font-size:22px;font-weight:300}
+  /* rules card */
+  .rules-card{background:var(--bg-2);border:1px solid var(--line);border-radius:24px;padding:36px;position:relative}
+  .rules-card::before{
+    content:"01";position:absolute;top:-22px;right:32px;font-family:'Fraunces';font-style:italic;
+    font-size:64px;font-weight:300;color:var(--gold);
+  }
+  .rules-card h3{font-family:'Fraunces';font-weight:400;font-size:28px;margin-bottom:20px;letter-spacing:-.01em}
+  .rules-card ul{list-style:none}
+  .rules-card li{padding:14px 0;border-bottom:1px solid var(--line);display:flex;gap:16px;color:var(--ink-2);line-height:1.45}
+  .rules-card li:last-child{border-bottom:none}
+  .rules-card li::before{content:"→";color:var(--gold);font-family:'Fraunces';font-size:18px;flex-shrink:0}
+
+  /* ============ GAME ============ */
+  #game{display:none;padding:24px 40px 80px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+  .brand{display:flex;align-items:center;gap:12px;font-family:'Fraunces';font-style:italic;font-size:22px;color:var(--ink-2)}
+  .brand .dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+  .month-indicator{font-family:'JetBrains Mono';font-size:12px;letter-spacing:.18em;color:var(--ink-3)}
+  .month-indicator b{color:var(--gold)}
+
+  /* Stats hero */
+  .stats-hero{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:24px;overflow:hidden;margin-bottom:32px;
+  }
+  .stat{background:var(--bg-2);padding:28px 32px;position:relative;transition:background .3s}
+  .stat .lab{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.2em;color:var(--ink-3);text-transform:uppercase;margin-bottom:12px}
+  .stat .val{font-family:'Fraunces';font-weight:300;font-size:42px;letter-spacing:-.02em;line-height:1}
+  .stat .val small{font-family:'Manrope';font-size:14px;color:var(--ink-2);font-weight:400;margin-left:4px}
+  .stat .delta{font-family:'JetBrains Mono';font-size:11px;color:var(--mint);margin-top:8px;display:block;min-height:14px}
+  .stat .delta.neg{color:var(--coral)}
+  .stat.gold .val{color:var(--gold)}
+
+  /* Three column game layout */
+  .game-grid{display:grid;grid-template-columns:280px 1fr 320px;gap:24px}
+  @media (max-width:1100px){.game-grid{grid-template-columns:1fr}}
+
+  /* Goals panel */
+  .panel{background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:24px;margin-bottom:20px}
+  .panel-title{font-family:'Fraunces';font-weight:400;font-size:20px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:baseline}
+  .panel-title small{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.18em;color:var(--ink-3);text-transform:uppercase}
+
+  .goal{padding:16px 0;border-bottom:1px solid var(--line)}
+  .goal:last-child{border-bottom:none}
+  .goal-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .goal-name{font-size:14px;font-weight:600}
+  .goal-cost{font-family:'JetBrains Mono';font-size:12px;color:var(--ink-2)}
+  .goal-bar{height:4px;background:var(--bg-3);border-radius:2px;overflow:hidden}
+  .goal-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-soft));transition:width .6s cubic-bezier(.2,.8,.2,1);border-radius:2px}
+  .goal.done .goal-name::before{content:"✓ ";color:var(--mint)}
+  .goal.done .goal-bar-fill{background:var(--mint)}
+  .goal.done{opacity:.55}
+  .goal-buy{margin-top:10px;font-size:11px;font-family:'JetBrains Mono';letter-spacing:.1em;color:var(--gold);background:none;border:1px solid var(--gold);padding:6px 12px;border-radius:99px;cursor:pointer;text-transform:uppercase;transition:all .2s}
+  .goal-buy:hover{background:var(--gold);color:var(--bg)}
+  .goal-buy:disabled{opacity:.3;cursor:not-allowed;border-color:var(--ink-3);color:var(--ink-3)}
+
+  /* Center play area */
+  .play{display:flex;flex-direction:column;gap:20px}
+  .event-card{
+    background:linear-gradient(135deg,rgba(232,181,71,.08),rgba(123,224,176,.04));
+    border:1px solid rgba(232,181,71,.3);border-radius:20px;padding:28px;position:relative;overflow:hidden;
+  }
+  .event-card .tag{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:12px;display:block}
+  .event-card h3{font-family:'Fraunces';font-weight:400;font-size:26px;letter-spacing:-.01em;margin-bottom:10px;line-height:1.15}
+  .event-card p{color:var(--ink-2);line-height:1.5;font-size:14px;margin-bottom:18px}
+  .event-card .effect{font-family:'JetBrains Mono';font-size:13px;font-weight:600}
+  .event-card .effect.pos{color:var(--mint)}
+  .event-card .effect.neg{color:var(--coral)}
+  .event-illustration{position:absolute;top:20px;right:24px;font-family:'Fraunces';font-style:italic;font-size:80px;color:rgba(232,181,71,.15);font-weight:300}
+
+  /* Action panel */
+  .actions{background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:28px}
+  .actions h3{font-family:'Fraunces';font-weight:400;font-size:24px;margin-bottom:6px}
+  .actions .sub{font-size:13px;color:var(--ink-2);margin-bottom:24px}
+
+  .deposit-options{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+  .dep-opt{
+    background:var(--bg-3);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;
+    transition:all .25s;text-align:left;color:var(--ink);
+  }
+  .dep-opt:hover{border-color:var(--gold-soft);background:var(--bg-3)}
+  .dep-opt.active{border-color:var(--gold);background:rgba(232,181,71,.08)}
+  .dep-opt .nm{font-size:13px;font-weight:600;margin-bottom:4px}
+  .dep-opt .rt{font-family:'JetBrains Mono';font-size:18px;color:var(--gold);font-weight:700}
+  .dep-opt .rt small{font-size:10px;color:var(--ink-3);font-weight:400}
+  .dep-opt .lk{font-family:'JetBrains Mono';font-size:9px;color:var(--ink-3);letter-spacing:.15em;text-transform:uppercase;margin-top:4px;display:block}
+
+  .amount-row{display:flex;gap:12px;align-items:end;margin-bottom:16px}
+  .amount-input{flex:1;display:flex;flex-direction:column;gap:6px}
+  .amount-input label{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.2em;color:var(--ink-3);text-transform:uppercase}
+  .amount-input input{
+    background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:14px 16px;border-radius:12px;
+    font-family:'JetBrains Mono';font-size:18px;outline:none;transition:border .2s;
+  }
+  .amount-input input:focus{border-color:var(--gold)}
+  .quick-amts{display:flex;gap:6px;margin-top:8px}
+  .quick-amts button{
+    flex:1;background:transparent;border:1px solid var(--line);color:var(--ink-2);
+    padding:6px;border-radius:8px;font-family:'JetBrains Mono';font-size:11px;cursor:pointer;transition:all .15s;
+  }
+  .quick-amts button:hover{border-color:var(--gold);color:var(--gold)}
+
+  .deposit-btn{
+    width:100%;padding:16px;background:transparent;border:1px solid var(--gold);color:var(--gold);
+    border-radius:12px;font-family:'Manrope';font-weight:600;cursor:pointer;transition:all .2s;font-size:14px;
+  }
+  .deposit-btn:hover{background:var(--gold);color:var(--bg)}
+  .deposit-btn:disabled{opacity:.3;cursor:not-allowed}
+
+  .next-month{
+    width:100%;margin-top:20px;padding:22px;border:none;cursor:pointer;
+    background:var(--ink);color:var(--bg);font-family:'Manrope';font-weight:700;font-size:16px;
+    border-radius:14px;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:14px;
+  }
+  .next-month:hover{background:var(--gold);transform:translateY(-1px)}
+  .next-month .arrow{font-family:'Fraunces';font-size:22px;font-weight:300}
+
+  /* Right side */
+  .balance-list{display:flex;flex-direction:column;gap:2px}
+  .bal-row{padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .bal-row:last-child{border-bottom:none}
+  .bal-row .nm{font-size:12px;color:var(--ink-2)}
+  .bal-row .am{font-family:'JetBrains Mono';font-size:13px;font-weight:600}
+  .bal-row .am.zero{color:var(--ink-3);font-weight:400}
+  .deposits-list{margin-top:10px}
+  .ftd{padding:10px;background:var(--bg-3);border-radius:10px;margin-bottom:8px;font-size:12px}
+  .ftd-head{display:flex;justify-content:space-between;margin-bottom:4px}
+  .ftd-rt{color:var(--gold);font-family:'JetBrains Mono';font-size:11px}
+  .ftd-bar{height:3px;background:var(--bg);border-radius:2px;overflow:hidden;margin-top:6px}
+  .ftd-bar-fill{height:100%;background:var(--mint);transition:width .4s}
+
+  /* Chart */
+  .chart-wrap{margin-top:8px}
+  .chart-wrap svg{width:100%;height:140px;display:block}
+
+  /* Log */
+  .log{max-height:240px;overflow-y:auto;font-size:12px;line-height:1.5;color:var(--ink-2)}
+  .log::-webkit-scrollbar{width:4px}
+  .log::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
+  .log p{padding:6px 0;border-bottom:1px solid var(--line)}
+  .log p:last-child{border-bottom:none}
+  .log .mo{font-family:'JetBrains Mono';color:var(--ink-3);font-size:10px;letter-spacing:.1em;margin-right:8px}
+  .log .ok{color:var(--mint)}
+  .log .bad{color:var(--coral)}
+  .log .gld{color:var(--gold)}
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(120%);
+    background:var(--bg-2);border:1px solid var(--gold);padding:16px 24px;border-radius:16px;
+    z-index:100;transition:transform .4s cubic-bezier(.2,.8,.2,1);max-width:480px;
+    box-shadow:0 20px 60px -10px rgba(0,0,0,.5);
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast .tag{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:6px}
+  .toast h4{font-family:'Fraunces';font-weight:400;font-size:18px;margin-bottom:4px}
+  .toast p{font-size:13px;color:var(--ink-2);line-height:1.4}
+
+  /* End screen */
+  #end{display:none;min-height:100vh;padding:80px 40px;align-items:center}
+  #end.show{display:flex}
+  .end-grid{max-width:1100px;margin:0 auto;width:100%}
+  .end-grade{font-family:'Fraunces';font-style:italic;font-size:clamp(120px,20vw,260px);font-weight:200;letter-spacing:-.04em;line-height:.85;color:var(--gold);margin-bottom:24px}
+  .end-title{font-family:'Fraunces';font-weight:300;font-size:clamp(36px,5vw,64px);letter-spacing:-.02em;margin-bottom:40px}
+  .end-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:48px}
+  .end-stat{background:var(--bg-2);padding:24px}
+  .end-stat .l{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.2em;color:var(--ink-3);margin-bottom:10px;text-transform:uppercase}
+  .end-stat .v{font-family:'Fraunces';font-weight:300;font-size:36px;letter-spacing:-.02em}
+  .lessons{background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:32px;margin-bottom:32px}
+  .lessons h3{font-family:'Fraunces';font-weight:400;font-size:24px;margin-bottom:20px}
+  .lesson-item{display:flex;gap:18px;padding:14px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+  .lesson-item:last-child{border-bottom:none}
+  .lesson-item .ic{font-family:'Fraunces';font-style:italic;color:var(--gold);font-size:22px;width:32px;flex-shrink:0;font-weight:300}
+  .lesson-item p{color:var(--ink-2);font-size:14px;line-height:1.55}
+  .lesson-item p b{color:var(--ink)}
+  .replay-btn{
+    display:inline-flex;align-items:center;gap:14px;padding:18px 32px;border:1px solid var(--gold);
+    background:transparent;color:var(--gold);font-family:'Manrope';font-weight:600;font-size:15px;
+    border-radius:99px;cursor:pointer;transition:all .25s;
+  }
+  .replay-btn:hover{background:var(--gold);color:var(--bg)}
+
+  /* Animations */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .fade-up{animation:fadeUp .6s cubic-bezier(.2,.8,.2,1) backwards}
+  .delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}.delay-3{animation-delay:.3s}.delay-4{animation-delay:.4s}
+
+  /* Responsive */
+  @media (max-width:900px){
+    .intro-grid{grid-template-columns:1fr;gap:48px}
+    .stats-hero{grid-template-columns:repeat(2,1fr)}
+    .end-stats{grid-template-columns:repeat(2,1fr)}
+    .deposit-options{grid-template-columns:1fr 1fr}
+    .container,#intro,#game,#end{padding-left:20px;padding-right:20px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= INTRO ================= -->
+<section id="intro">
+  <div class="intro-grid">
+    <div>
+      <div class="intro-eyebrow fade-up">
+        <span class="dot"></span>
+        <span class="label">Боловсрол · Тоглоом · 2026</span>
+      </div>
+      <h1 class="intro-title display fade-up delay-1">Мөнгөний<br><em>Аялал.</em></h1>
+      <p class="intro-sub fade-up delay-2">
+        Чи 13 настай. Гарт <b>30,000 төгрөг</b>, сар бүр <b>цалин</b> орж ирнэ.
+        24 сарын дотор ухаалгаар хадгалж, хүүгийн хүчийг ашиглан
+        <b>4 том зорилго</b>-доо хүрч чадах уу?
+      </p>
+      <button class="start-btn fade-up delay-3" onclick="startGame()">
+        Тоглоом эхлүүлэх <span class="arrow">→</span>
+      </button>
+    </div>
+    <div class="rules-card fade-up delay-4">
+      <h3>Дүрэм</h3>
+      <ul>
+        <li>Сар бүр цалингаа аваад зарцуулна, хадгална, хөрөнгө оруулна.</li>
+        <li>Харилцах данс — хэдийд ч авна, гэхдээ хүү багатай.</li>
+        <li>Хугацаатай хадгаламж — хүү өндөр, гэхдээ түгжээтэй.</li>
+        <li>Гэнэтийн үйл явдлууд орлого зарлагыг өөрчилнө.</li>
+        <li>24-р сарын эцэст үнэлгээ авна: <em style="color:var(--gold)">A+ → F</em></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GAME ================= -->
+<section id="game">
+  <div class="container">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span> Мөнгөний аялал</div>
+      <div class="month-indicator">САР <b id="mo-now">01</b> / 24</div>
+    </div>
+
+    <!-- Stats hero -->
+    <div class="stats-hero">
+      <div class="stat">
+        <span class="lab">Бэлэн мөнгө</span>
+        <span class="val num" id="s-cash">30,000<small>₮</small></span>
+        <span class="delta" id="s-cash-delta"></span>
+      </div>
+      <div class="stat">
+        <span class="lab">Хадгаламж</span>
+        <span class="val num" id="s-saved">0<small>₮</small></span>
+        <span class="delta" id="s-saved-delta"></span>
+      </div>
+      <div class="stat gold">
+        <span class="lab">Нийт хөрөнгө</span>
+        <span class="val num" id="s-net">30,000<small>₮</small></span>
+        <span class="delta" id="s-net-delta"></span>
+      </div>
+      <div class="stat">
+        <span class="lab">Сарын цалин</span>
+        <span class="val num" id="s-inc">60,000<small>₮</small></span>
+        <span class="delta" id="s-age">13 нас</span>
+      </div>
+    </div>
+
+    <!-- Game grid -->
+    <div class="game-grid">
+      <!-- LEFT: Goals -->
+      <div>
+        <div class="panel">
+          <div class="panel-title">Зорилго <small id="goals-counter">0 / 4</small></div>
+          <div id="goals-list"></div>
+        </div>
+      </div>
+
+      <!-- CENTER: Play -->
+      <div class="play">
+        <div id="event-slot"></div>
+
+        <div class="actions">
+          <h3>Энэ сард яах вэ?</h3>
+          <p class="sub">Бэлэн мөнгөнөөсөө аль нэг хадгаламжид байршуулж, хүү тооцуулж эхэл.</p>
+
+          <div class="label" style="margin-bottom:10px">Хадгаламжийн төрөл сонго</div>
+          <div class="deposit-options" id="dep-options"></div>
+
+          <div class="amount-row">
+            <div class="amount-input">
+              <label>Байршуулах дүн</label>
+              <input type="number" id="dep-amount" placeholder="0" min="0" step="1000">
+              <div class="quick-amts">
+                <button onclick="setAmt(0.25)">25%</button>
+                <button onclick="setAmt(0.5)">50%</button>
+                <button onclick="setAmt(0.75)">75%</button>
+                <button onclick="setAmt(1)">Бүгд</button>
+              </div>
+            </div>
+          </div>
+          <button class="deposit-btn" onclick="doDeposit()">Хадгаламжид байршуулах</button>
+
+          <button class="next-month" onclick="nextMonth()">
+            Дараагийн сар <span class="arrow">→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Info -->
+      <div>
+        <div class="panel">
+          <div class="panel-title">Балланс <small>ДАНСУУД</small></div>
+          <div class="balance-list" id="balance-list"></div>
+          <div class="deposits-list" id="deposits-list"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Хөрөнгийн өсөлт <small>График</small></div>
+          <div class="chart-wrap"><svg id="chart" viewBox="0 0 280 140" preserveAspectRatio="none"></svg></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Түүх <small>Лог</small></div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= END ================= -->
+<section id="end">
+  <div class="end-grid">
+    <div class="label fade-up">24-р сар · Үр дүн</div>
+    <div class="end-grade fade-up delay-1" id="e-grade">A</div>
+    <h2 class="end-title fade-up delay-2" id="e-title">Чи санхүүгийн ухаантай нэгэн боллоо.</h2>
+
+    <div class="end-stats fade-up delay-3">
+      <div class="end-stat"><div class="l">Нийт хөрөнгө</div><div class="v num" id="e-net">0₮</div></div>
+      <div class="end-stat"><div class="l">Нийт хүү</div><div class="v num" id="e-int">0₮</div></div>
+      <div class="end-stat"><div class="l">Биелсэн зорилго</div><div class="v num" id="e-goals">0/4</div></div>
+      <div class="end-stat"><div class="l">Оноо</div><div class="v num" id="e-score">0</div></div>
+    </div>
+
+    <div class="lessons fade-up delay-4">
+      <h3>Чи юу сурсан бэ?</h3>
+      <div id="lesson-list"></div>
+    </div>
+
+    <button class="replay-btn" onclick="restart()">Дахин тоглох <span style="font-family:Fraunces;font-size:22px">↻</span></button>
+  </div>
+</section>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="tag" id="toast-tag">Зөвлөгөө</span>
+  <h4 id="toast-title"></h4>
+  <p id="toast-msg"></p>
+</div>
+
+<script>
+/* ============================================================
+   МӨНГӨНИЙ АЯЛАЛ — Game Logic
+   Санхүүгийн боловсролын тоглоом
+============================================================ */
+
+const CONFIG = {
+  totalMonths: 24,
+  startAge: 13,
+  startCash: 30000,
+  startIncome: 60000,
+  // Насны дагуу сарын орлого өөрчлөгдөнө
+  incomeSchedule: [
+    {month:0,  income:60000},   // 13 нас
+    {month:6,  income:120000},  // 14 нас
+    {month:12, income:250000},  // 15 нас
+    {month:18, income:450000},  // 16 нас
+  ],
+  // Хадгаламжийн бүтээгдэхүүн (жилийн хүү)
+  products: [
+    {id:'current', name:'Харилцах',   rate:0.012, lock:0, desc:'Хэдийд ч авна'},
+    {id:'savings', name:'Хугацаагүй', rate:0.05,  lock:0, desc:'Хэдийд ч авна'},
+    {id:'fixed1',  name:'1 сар',      rate:0.074, lock:1, desc:'1 сар түгжээтэй'},
+    {id:'fixed6',  name:'6 сар',      rate:0.10,  lock:6, desc:'6 сар түгжээтэй'},
+    {id:'fixed12', name:'12 сар',     rate:0.115, lock:12,desc:'12 сар түгжээтэй'},
+    {id:'fixed24', name:'24 сар',     rate:0.125, lock:24,desc:'24 сар түгжээтэй'},
+  ],
+  // Зорилго
+  goals: [
+    {id:'bike',  name:'Велосипед',     cost:250000,  desc:'Хорооллын хамгийн хүчтэй машин'},
+    {id:'phone', name:'Шинэ утас',     cost:800000,  desc:'Сүүлийн үеийн загвар'},
+    {id:'camp',  name:'Зуны аялал',    cost:1500000, desc:'Найзуудтайгаа далайн эрэг рүү'},
+    {id:'big',   name:'Том төлөвлөгөө',cost:3000000, desc:'Их сургуулийн сангийн эхлэл'},
+  ],
+  // Санамсаргүй үйл явдлууд
+  events: [
+    {tag:'БЭЛЭГ',     title:'Төрсөн өдрийн бэлэг',      desc:'Хамаатан садан чамд бэлэг хийлээ.',       amt:+150000, prob:.07},
+    {tag:'УРАЛДААН',  title:'Спортын тэмцээнд түрүүллээ',desc:'Шагнал болсон.',                          amt:+80000,  prob:.06},
+    {tag:'АЖИЛ',      title:'Зуны цагт түр ажил оллоо',  desc:'Нэг удаагийн нэмэлт орлого.',            amt:+200000, prob:.05},
+    {tag:'УРАЛДААН',  title:'Гар урлалын тэмцээн',       desc:'Гуравдугаар байр эзэллээ.',               amt:+40000,  prob:.05},
+    {tag:'НАЙЗУУД',   title:'Найзын төрсөн өдөр',        desc:'Бэлэг авлаа.',                            amt:-50000,  prob:.08},
+    {tag:'ОСОЛ',      title:'Утас гэмтлээ',              desc:'Засуулах хэрэгтэй болов.',                amt:-180000, prob:.05},
+    {tag:'ХЭРЭГЦЭЭ',  title:'Сурах бичиг шинэчиллээ',   desc:'Шинэ улирлын хэрэгцээ.',                 amt:-90000,  prob:.06},
+    {tag:'ЭМНЭЛЭГ',   title:'Шүдний эмчид үзүүлэв',     desc:'Нэг удаагийн зардал.',                    amt:-120000, prob:.04},
+    {tag:'БОЛОМЖ',    title:'Стипенд авлаа',             desc:'Сурлагын амжилтын төлөө.',                amt:+250000, prob:.04},
+    {tag:'ИНФЛЯЦ',    title:'Үнэ өсчээ',                 desc:'Энэ сар хэрэглээ нэмэгдэв.',             amt:-60000,  prob:.07},
+  ],
+  // Сарын заавал зарцуулалт (орлогын %)
+  consumptionRate: 0.45,
+};
+
+let state = null;
+let selectedProduct = 'savings';
+
+// Тоо форматлах
+function fmt(n){
+  n = Math.round(n);
+  return n.toLocaleString('en-US').replace(/,/g,',');
+}
+
+// Тоглоомын төлөв эхлүүлэх
+function init(){
+  state = {
+    month: 0,
+    cash: CONFIG.startCash,
+    income: CONFIG.startIncome,
+    age: CONFIG.startAge,
+    accounts: { current:0, savings:0 },
+    fixedDeposits: [], // { product, principal, openMonth, maturityMonth, rate }
+    goals: CONFIG.goals.map(g => ({...g, achieved:false, achievedMonth:null})),
+    history: [{ month:0, net:CONFIG.startCash }],
+    log: [],
+    totalInterest: 0,
+    eventsTriggered: 0,
+  };
+  selectedProduct = 'savings';
+}
+
+function startGame(){
+  init();
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  renderAll();
+  setTimeout(()=>{
+    showToast('Тавтай морил','Эхлээд бэлэн мөнгөө аль нэг хадгаламжид байршуулж үзээрэй.','Зөвлөгөө');
+  }, 600);
+}
+
+// Тухайн сарын орлого
+function getCurrentIncome(){
+  let inc = CONFIG.startIncome;
+  for(const s of CONFIG.incomeSchedule){
+    if(state.month >= s.month) inc = s.income;
+  }
+  return inc;
+}
+
+// Тухайн нас
+function getCurrentAge(){
+  return CONFIG.startAge + Math.floor(state.month / 12);
+}
+
+// Нийт хадгаламж (бүх данс)
+function totalSavings(){
+  return state.accounts.current + state.accounts.savings
+    + state.fixedDeposits.reduce((s,d)=>s+d.principal,0);
+}
+
+// Нийт хөрөнгө
+function netWorth(){
+  return state.cash + totalSavings();
+}
+
+// Хурдан дүн тохируулах
+function setAmt(pct){
+  const amt = Math.floor(state.cash * pct / 1000) * 1000;
+  document.getElementById('dep-amount').value = amt;
+}
+
+// Хадгаламжид байршуулах
+function doDeposit(){
+  const amtRaw = document.getElementById('dep-amount').value;
+  const amt = parseInt(amtRaw);
+  if(!amt || amt<=0){ showToast('Алдаа','Дүн оруулна уу.','Анхаар'); return; }
+  if(amt > state.cash){ showToast('Алдаа','Бэлэн мөнгөнөөс хэтэрсэн байна.','Анхаар'); return; }
+
+  const prod = CONFIG.products.find(p=>p.id===selectedProduct);
+  state.cash -= amt;
+
+  if(prod.id === 'current') state.accounts.current += amt;
+  else if(prod.id === 'savings') state.accounts.savings += amt;
+  else {
+    state.fixedDeposits.push({
+      product: prod.id,
+      productName: prod.name,
+      principal: amt,
+      rate: prod.rate,
+      openMonth: state.month,
+      maturityMonth: state.month + prod.lock,
+    });
+  }
+  addLog(`${prod.name} дансанд ${fmt(amt)}₮ байршуулав`,'gld');
+  document.getElementById('dep-amount').value = '';
+  renderAll();
+}
+
+// Зорилго худалдан авах
+function buyGoal(idx){
+  const g = state.goals[idx];
+  if(g.achieved) return;
+  const liquid = state.cash + state.accounts.current + state.accounts.savings;
+  if(liquid < g.cost){
+    showToast('Хүрэхгүй байна','Хугацаатай хадгаламжаас авч болохгүй. Бэлэн мөнгө + харилцах + хугацаагүй хадгаламж нийлээд хүрэх ёстой.','Анхаар');
+    return;
+  }
+  // Мөнгийг дарааллаар хасна: бэлэн → харилцах → хадгаламж
+  let remain = g.cost;
+  const fromCash = Math.min(state.cash, remain); state.cash -= fromCash; remain -= fromCash;
+  const fromCurrent = Math.min(state.accounts.current, remain); state.accounts.current -= fromCurrent; remain -= fromCurrent;
+  const fromSavings = Math.min(state.accounts.savings, remain); state.accounts.savings -= fromSavings; remain -= fromSavings;
+
+  g.achieved = true;
+  g.achievedMonth = state.month;
+  addLog(`🎉 "${g.name}" зорилгод хүрлээ!`,'ok');
+  showToast(g.name,'Зорилго биелэв! Чи санхүүгээ ухаалгаар удирдаж чадаж байна.','Амжилт');
+  renderAll();
+}
+
+// Санамсаргүй үйл явдал гаргах
+function maybeFireEvent(){
+  if(Math.random() > 0.55) return null;
+  const total = CONFIG.events.reduce((s,e)=>s+e.prob,0);
+  let r = Math.random()*total;
+  for(const e of CONFIG.events){
+    r -= e.prob;
+    if(r<=0){
+      if(state.month < 2 && Math.abs(e.amt) > 100000) return null;
+      return e;
+    }
+  }
+  return null;
+}
+
+// Үйл явдал хэрэгжүүлэх
+function applyEvent(ev){
+  state.cash = Math.max(0, state.cash + ev.amt);
+  state.eventsTriggered++;
+  if(ev.amt > 0) addLog(`${ev.title}: +${fmt(ev.amt)}₮`,'ok');
+  else addLog(`${ev.title}: ${fmt(ev.amt)}₮`,'bad');
+}
+
+// Сарын хүү тооцоолох (харилцах, хадгаламж)
+function accrueInterest(){
+  let totalInt = 0;
+  if(state.accounts.current > 0){
+    const i = state.accounts.current * 0.012/12;
+    state.accounts.current += i; totalInt += i;
+  }
+  if(state.accounts.savings > 0){
+    const i = state.accounts.savings * 0.05/12;
+    state.accounts.savings += i; totalInt += i;
+  }
+  state.totalInterest += totalInt;
+  return totalInt;
+}
+
+// Хугацаатай хадгаламж дуусах үед
+function processMaturity(){
+  const matured = state.fixedDeposits.filter(d => d.maturityMonth === state.month);
+  for(const d of matured){
+    // F = P * (1 + R * T/12) — энгийн хүүний томьёо
+    const months = d.maturityMonth - d.openMonth;
+    const F = d.principal * (1 + d.rate * months/12);
+    const interest = F - d.principal;
+    state.accounts.savings += F;
+    state.totalInterest += interest;
+    addLog(`${d.productName} хадгаламж хугацаа дуусч: ${fmt(F)}₮ (хүү +${fmt(interest)}₮)`,'gld');
+  }
+  state.fixedDeposits = state.fixedDeposits.filter(d => d.maturityMonth > state.month);
+}
+
+// Сарын заавал зарцуулалт хасах
+function deductConsumption(){
+  const need = Math.floor(state.income * CONFIG.consumptionRate);
+  if(state.cash >= need){
+    state.cash -= need;
+    addLog(`Сарын зардал: -${fmt(need)}₮`,'');
+  } else {
+    let remain = need - state.cash;
+    state.cash = 0;
+    const fromC = Math.min(state.accounts.current, remain);
+    state.accounts.current -= fromC; remain -= fromC;
+    const fromS = Math.min(state.accounts.savings, remain);
+    state.accounts.savings -= fromS; remain -= fromS;
+    addLog(`Сарын зардал: -${fmt(need)}₮ (хадгаламжаас гарзалсан)`,'bad');
+  }
+}
+
+// Дараагийн сар руу шилжих
+function nextMonth(){
+  if(state.month >= CONFIG.totalMonths){ endGame(); return; }
+
+  // 1. Цалин ирнэ
+  const inc = getCurrentIncome();
+  state.income = inc;
+  state.cash += inc;
+  addLog(`Сарын цалин: +${fmt(inc)}₮`,'ok');
+
+  // 2. Хэрэглээний зардал хасна
+  deductConsumption();
+
+  // 3. Санамсаргүй үйл явдал
+  const ev = maybeFireEvent();
+  if(ev) applyEvent(ev);
+
+  // 4. Хүү нэмнэ
+  accrueInterest();
+
+  // 5. Сар нэмэгдэнэ
+  state.month++;
+  state.age = getCurrentAge();
+
+  // 6. Хугацаатай хадгаламж дуусгавар болгох
+  processMaturity();
+
+  // 7. Түүх хадгалах
+  state.history.push({ month: state.month, net: netWorth() });
+
+  showEventCard(ev);
+
+  if(state.month >= CONFIG.totalMonths){
+    setTimeout(endGame, 800);
+    return;
+  }
+
+  // Боловсролын зөвлөгөө
+  if(state.month === 3)  showToast('Нийлмэл хүүний хүч','Хүү дээр хүү нэмэгдэж тооцогдоно — энэ нь "цаг хугацаа = мөнгө" гэдгийн утга.','Хичээл');
+  if(state.month === 6)  showToast('Хадгаламжийн зуучлал','Банк бол санхүүгийн "гүүр" — мөнгөтэй хүмүүсээс мөнгө хэрэгтэй хүмүүст хүргэдэг.','Хичээл');
+  if(state.month === 12) showToast('Нэг жил өнгөрлөө','Хугацаатай хадгаламж хүү өндөр гэж энэ үед мэдэгдэнэ. Том дүнг түгжсэнээр илүү ашигтай.','Хичээл');
+  if(state.month === 18) showToast('Бодлогын хүү','Монголбанк улсын хэмжээний хүүгийн түвшинг тогтоодог. Энэ нь чиний хадгаламжийн хүүг шууд тодорхойлно.','Хичээл');
+
+  renderAll();
+}
+
+// Үйл явдлын карт харуулах
+function showEventCard(ev){
+  const slot = document.getElementById('event-slot');
+  if(!ev){ slot.innerHTML = ''; return; }
+  const cls = ev.amt > 0 ? 'pos' : 'neg';
+  const sign = ev.amt > 0 ? '+' : '';
+  const ill = ev.amt > 0 ? '✦' : '◇';
+  slot.innerHTML = `
+    <div class="event-card fade-up">
+      <span class="tag">${ev.tag}</span>
+      <h3>${ev.title}</h3>
+      <p>${ev.desc}</p>
+      <span class="effect ${cls}">${sign}${fmt(ev.amt)}₮</span>
+      <span class="event-illustration">${ill}</span>
+    </div>
+  `;
+  setTimeout(()=>{ slot.innerHTML = ''; }, 4500);
+}
+
+// Toast мэдэгдэл
+function showToast(title, msg, tag){
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-tag').textContent = tag || 'Мэдээлэл';
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=> t.classList.remove('show'), 4500);
+}
+
+// Лог нэмэх
+function addLog(text, cls){
+  state.log.unshift({ month: state.month + 1, text, cls });
+  if(state.log.length > 40) state.log.pop();
+}
+
+/* ============ ХАРУУЛАХ ФУНКЦҮҮД ============ */
+function renderAll(){
+  renderStats();
+  renderGoals();
+  renderProducts();
+  renderBalances();
+  renderDeposits();
+  renderChart();
+  renderLog();
+}
+
+function renderStats(){
+  document.getElementById('mo-now').textContent = String(Math.min(state.month+1, CONFIG.totalMonths)).padStart(2,'0');
+  document.getElementById('s-cash').innerHTML = fmt(state.cash) + '<small>₮</small>';
+  document.getElementById('s-saved').innerHTML = fmt(totalSavings()) + '<small>₮</small>';
+  document.getElementById('s-net').innerHTML = fmt(netWorth()) + '<small>₮</small>';
+  document.getElementById('s-inc').innerHTML = fmt(getCurrentIncome()) + '<small>₮</small>';
+  document.getElementById('s-age').textContent = getCurrentAge() + ' нас';
+}
+
+function renderGoals(){
+  const wrap = document.getElementById('goals-list');
+  const liquid = state.cash + state.accounts.current + state.accounts.savings;
+  wrap.innerHTML = state.goals.map((g,i)=>{
+    const pct = Math.min(100, (liquid / g.cost) * 100);
+    const can = !g.achieved && liquid >= g.cost;
+    return `
+      <div class="goal ${g.achieved?'done':''}">
+        <div class="goal-head">
+          <span class="goal-name">${g.name}</span>
+          <span class="goal-cost num">${fmt(g.cost)}₮</span>
+        </div>
+        <div class="goal-bar"><div class="goal-bar-fill" style="width:${g.achieved?100:pct}%"></div></div>
+        ${g.achieved
+          ? `<div style="font-size:11px;color:var(--mint);margin-top:8px;font-family:JetBrains Mono">${g.achievedMonth+1}-р сард биеллээ</div>`
+          : `<button class="goal-buy" onclick="buyGoal(${i})" ${can?'':'disabled'}>${can?'Худалдан авах':'Хүрэхгүй байна'}</button>`
+        }
+      </div>
+    `;
+  }).join('');
+  const done = state.goals.filter(g=>g.achieved).length;
+  document.getElementById('goals-counter').textContent = `${done} / 4`;
+}
+
+function renderProducts(){
+  const wrap = document.getElementById('dep-options');
+  wrap.innerHTML = CONFIG.products.map(p=>`
+    <button class="dep-opt ${selectedProduct===p.id?'active':''}" onclick="selectProduct('${p.id}')">
+      <div class="nm">${p.name}</div>
+      <div class="rt">${(p.rate*100).toFixed(2)}<small>% жил</small></div>
+      <span class="lk">${p.desc}</span>
+    </button>
+  `).join('');
+}
+function selectProduct(id){ selectedProduct = id; renderProducts(); }
+
+function renderBalances(){
+  const wrap = document.getElementById('balance-list');
+  wrap.innerHTML = `
+    <div class="bal-row"><span class="nm">Бэлэн мөнгө</span><span class="am num">${fmt(state.cash)}₮</span></div>
+    <div class="bal-row"><span class="nm">Харилцах · 1.20%</span><span class="am num ${state.accounts.current?'':'zero'}">${fmt(state.accounts.current)}₮</span></div>
+    <div class="bal-row"><span class="nm">Хугацаагүй · 5%</span><span class="am num ${state.accounts.savings?'':'zero'}">${fmt(state.accounts.savings)}₮</span></div>
+  `;
+}
+
+function renderDeposits(){
+  const wrap = document.getElementById('deposits-list');
+  if(state.fixedDeposits.length === 0){ wrap.innerHTML = ''; return; }
+  wrap.innerHTML = state.fixedDeposits.map(d=>{
+    const total = d.maturityMonth - d.openMonth;
+    const elapsed = state.month - d.openMonth;
+    const pct = Math.min(100, (elapsed/total)*100);
+    const remain = d.maturityMonth - state.month;
+    return `
+      <div class="ftd">
+        <div class="ftd-head">
+          <span><b>${d.productName}</b> · ${fmt(d.principal)}₮</span>
+          <span class="ftd-rt">${(d.rate*100).toFixed(2)}%</span>
+        </div>
+        <div style="font-size:10px;color:var(--ink-3);font-family:JetBrains Mono">${remain} сар үлдэж байна</div>
+        <div class="ftd-bar"><div class="ftd-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderChart(){
+  const svg = document.getElementById('chart');
+  const W = 280, H = 140, PAD = 8;
+  const data = state.history;
+  if(data.length < 2){
+    svg.innerHTML = `<text x="140" y="70" fill="#6E7079" text-anchor="middle" font-family="JetBrains Mono" font-size="10">График</text>`;
+    return;
+  }
+  const maxV = Math.max(...data.map(d=>d.net), 10000);
+  const minV = 0;
+  const xStep = (W - PAD*2) / CONFIG.totalMonths;
+  const points = data.map(d=>{
+    const x = PAD + d.month * xStep;
+    const y = H - PAD - ((d.net - minV) / (maxV - minV)) * (H - PAD*2);
+    return `${x},${y}`;
+  });
+  const path = `M ${points[0]} ` + points.slice(1).map(p=>`L ${p}`).join(' ');
+  const fillPath = path + ` L ${PAD + data[data.length-1].month * xStep},${H-PAD} L ${PAD},${H-PAD} Z`;
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#E8B547" stop-opacity="0.4"/>
+        <stop offset="100%" stop-color="#E8B547" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="${fillPath}" fill="url(#grad)"/>
+    <path d="${path}" stroke="#E8B547" stroke-width="1.5" fill="none"/>
+    <text x="${W-PAD}" y="${H-PAD-2}" fill="#6E7079" text-anchor="end" font-family="JetBrains Mono" font-size="9">${fmt(maxV)}₮</text>
+  `;
+}
+
+function renderLog(){
+  const wrap = document.getElementById('log');
+  wrap.innerHTML = state.log.slice(0,20).map(l=>
+    `<p><span class="mo">М${String(l.month).padStart(2,'0')}</span><span class="${l.cls||''}">${l.text}</span></p>`
+  ).join('') || '<p style="color:var(--ink-3)">Тоглоом дөнгөж эхэллээ...</p>';
+}
+
+/* ============ ТОГЛООМ ДУУСГАХ ============ */
+function endGame(){
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('end').classList.add('show');
+
+  // Үлдсэн хугацаатай хадгаламжийг хугацаанаас өмнө задлах (50% торгууль)
+  for(const d of state.fixedDeposits){
+    const elapsed = state.month - d.openMonth;
+    const F = d.principal * (1 + d.rate * elapsed/12 * 0.5);
+    state.accounts.savings += F;
+    state.totalInterest += (F - d.principal);
+  }
+  state.fixedDeposits = [];
+
+  const net = netWorth();
+  const goalsDone = state.goals.filter(g=>g.achieved).length;
+
+  // Оноо тооцоолох: зорилго (50%), хөрөнгө (25%), хүү (25%)
+  const goalScore = goalsDone * 250;
+  const netScore  = Math.min(400, net / 10000);
+  const intScore  = Math.min(300, state.totalInterest / 1500);
+  const score = Math.round(goalScore + netScore + intScore);
+
+  let grade, title;
+  if(score >= 1100){ grade = 'A+'; title = 'Чи төрөлхийн санхүүч ажээ.'; }
+  else if(score >= 850){ grade = 'A';  title = 'Чи санхүүгийн ухаантай нэгэн боллоо.'; }
+  else if(score >= 650){ grade = 'B+'; title = 'Сайн оролдсон. Цаашид илүү амжилт хүлээж байна.'; }
+  else if(score >= 450){ grade = 'B';  title = 'Үндсэн зүйлсийг сурлаа.'; }
+  else if(score >= 250){ grade = 'C';  title = 'Эхний алхам хийгдлээ.'; }
+  else                 { grade = 'D';  title = 'Дахин оролдвол илүү сайн болно.'; }
+
+  document.getElementById('e-grade').textContent  = grade;
+  document.getElementById('e-title').textContent  = title;
+  document.getElementById('e-net').textContent    = fmt(net) + '₮';
+  document.getElementById('e-int').textContent    = fmt(state.totalInterest) + '₮';
+  document.getElementById('e-goals').textContent  = goalsDone + '/4';
+  document.getElementById('e-score').textContent  = fmt(score);
+
+  // Сургамжийн хэсэг
+  const lessons = [];
+  if(state.totalInterest > 100000)
+    lessons.push('Хүү бол "идэвхгүй орлого" — чи юу ч хийхгүй байхад мөнгө чинь өсдөг. <b>Энэ бол нийлмэл хүүний хүч.</b>');
+  if(state.fixedDeposits.length === 0 && state.history.some(h=>h.net > 500000))
+    lessons.push('Том дүнг <b>хугацаатай хадгаламжид</b> түгжих нь жилийн 12.5% хүртэл хүү авах боломжийг олгодог.');
+  if(goalsDone === 4)
+    lessons.push('Зорилгоо <b>урьдчилан төлөвлөж</b>, сар бүр тогтмол хадгалснаар дөрвөн зорилго бүгд биелэлээ.');
+  if(state.eventsTriggered > 5)
+    lessons.push('Гэнэтийн зардал зайлшгүй гардаг. <b>Бэлэн мөнгөний нөөцтэй</b> байх нь хямралд бэлэн байх юм.');
+  if(state.cash > net * 0.5)
+    lessons.push('Хэт их бэлэн мөнгөтэй байх нь алдсан боломж — мөнгө инфляцид идэгддэг. <b>Хадгаламж нь хамгаалалт.</b>');
+  lessons.push('Банк бол <b>"санхүүгийн гүүр"</b> — хадгаламж эзэмшигчээс зээлдэгчид мөнгө дамжуулдаг.');
+  lessons.push('Монголбанк <b>бодлогын хүү</b>-гээр төгрөгийн тогтвортой байдлыг хангадаг бол Засгийн газар <b>татвараар</b> эдийн засгийг удирддаг.');
+
+  const ul = document.getElementById('lesson-list');
+  ul.innerHTML = lessons.slice(0,6).map((l,i)=>`
+    <div class="lesson-item">
+      <span class="ic">${String(i+1).padStart(2,'0')}</span>
+      <p>${l}</p>
+    </div>
+  `).join('');
+}
+
+// Дахин эхлүүлэх
+function restart(){
+  document.getElementById('end').classList.remove('show');
+  document.getElementById('intro').style.display = 'flex';
+  state = null;
+}
+</script>
+</body>
+</html>
